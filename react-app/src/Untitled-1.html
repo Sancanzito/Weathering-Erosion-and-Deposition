@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rock Lab</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#23272e;--mut:#667;--acc:#2f6f5e;--line:#d9d5cb;--bad:#b3402f;--ok:#2f7d4f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171a1d;--card:#22262b;--ink:#eceae4;--mut:#9aa;--acc:#6fc2a8;--line:#3a4047;--bad:#e5806f;--ok:#7bd19b}}
+:root[data-theme="dark"]{--bg:#171a1d;--card:#22262b;--ink:#eceae4;--mut:#9aa;--acc:#6fc2a8;--line:#3a4047;--bad:#e5806f;--ok:#7bd19b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}h1{font-size:1.4rem;margin:.2em 0}h2{font-size:1.1rem;margin:.2em 0 .5em}
+.tabs{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap}
+.tab{flex:1;min-width:110px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-size:.82rem;cursor:pointer}
+.tab.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}.tab:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+canvas{width:100%;max-width:420px;display:block;margin:0 auto;background:#e8edf0;border-radius:10px}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) canvas{background:#2c3238}}
+label{display:block;margin:10px 0 2px;font-size:.9rem}label b{float:right;color:var(--acc)}input[type=range]{width:100%;accent-color:var(--acc)}
+button.p{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer;margin:10px 8px 0 0}button.p:disabled{opacity:.5}
+button.g{background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 16px;font:inherit;cursor:pointer}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:8px 0 4px}.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .2s}
+.note{font-size:.88rem;color:var(--mut)}.msg{margin-top:10px;font-weight:600}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.hint{margin:10px 0;padding:10px 12px;border-left:4px solid var(--acc);background:var(--bg);border-radius:6px;font-size:.95rem}.hint code{font:600 1.05rem ui-monospace,monospace}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:none;color:var(--ink);font:inherit;cursor:pointer}.opt:hover{border-color:var(--acc)}
+.opt.correct{border-color:var(--ok);background:rgba(47,125,79,.1)}
+.opt.wrong{border-color:var(--bad);background:rgba(179,64,47,.1)}
+textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);color:var(--ink);font:inherit}
+.pics{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:340px;margin:0 auto 14px}.pics svg{width:100%;border-radius:10px;border:1px solid var(--line)}
+.slots,.bank{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.t{width:32px;height:42px;border:2px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:700 1.1rem system-ui;cursor:pointer}.slots .t{border-color:var(--acc)}.t:disabled{opacity:.25}
+.hide{display:none}
+.quiz-box{margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.quiz-box h3{margin:0 0 10px;font-size:1rem;color:var(--acc)}
+.continue-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+</style></head><body><main>
+<h1>🪨 Rock Lab</h1>
+<div class="note">Run each experiment, observe carefully, and unlock the next stage.</div>
+<div class="tabs" id="tabs"></div>
+
+<section id="s1" class="card"><h2>Stage 1 · Rock Lab A</h2>
+<canvas id="c1" width="420" height="270"></canvas>
+<label>Lowest temperature <b id="v_min">-5 °C</b></label><input type="range" id="min" min="-20" max="10" value="-5">
+<label>Highest temperature <b id="v_max">12 °C</b></label><input type="range" id="max" min="0" max="45" value="12">
+<label>Water in the crack <b id="v_w">60 %</b></label><input type="range" id="w" min="0" max="100" value="60">
+<label>Number of freeze–thaw cycles <b id="v_n">10</b></label><input type="range" id="n" min="1" max="50" value="10">
+<div class="bar"><i id="dmg"></i></div><div class="note" id="st1"></div>
+<div class="continue-bar">
+  <button class="p" id="run1">Run cycles</button>
+  <button class="g" id="rst1">New rock</button>
+</div>
+<div class="msg" id="m1"></div>
+<p class="note">Goal: make the rock split into smaller pieces. Change one setting at a time. Liquid water becomes ice at 0 °C, and ice takes up about 9% more space.</p>
+<div id="quiz1" class="quiz-box hide"></div>
+<div class="continue-bar" id="cont1" style="display:none">
+  <button class="p" id="continue1">✅ Continue to next experiment</button>
+</div>
+</section>
+
+<section id="s2" class="card hide"><h2>Stage 2 · Rock Lab B</h2>
+<canvas id="c2" width="420" height="270"></canvas>
+<div class="hint">💡 <b>Hint:</b> <code>CaCO₃ + H₂O + CO₂ → Ca²⁺ + 2 HCO₃⁻</code><br><span class="note">Limestone is CaCO₃. The more H⁺ (the lower the pH), the faster it reacts.</span></div>
+<label>Acidity of the rain (pH) <b id="v_ph">5.6</b></label><input type="range" id="ph" min="1" max="7" step="0.1" value="5.6">
+<label>Exposure time <b id="v_t">50 years</b></label><input type="range" id="t" min="5" max="100" step="5" value="50">
+<div class="bar"><i id="mass"></i></div><div class="note" id="st2"></div>
+<div class="continue-bar">
+  <button class="p" id="run2">Start exposure</button>
+  <button class="g" id="rst2">New rock</button>
+</div>
+<div class="msg" id="m2"></div>
+<p class="note">Goal: wear the limestone down until less than half of it remains.</p>
+<div id="quiz2" class="quiz-box hide"></div>
+<div class="continue-bar" id="cont2" style="display:none">
+  <button class="p" id="continue2">✅ Continue to next experiment</button>
+</div>
+</section>
+
+<section id="s3" class="card hide"><h2>Stage 3 · Rock Lab C</h2>
+<canvas id="c3" width="420" height="270"></canvas>
+<div class="hint">💡 <b>Hint:</b> <code>4 FeO + O₂ → 2 Fe₂O₃</code><br><span class="note">This rock has iron-bearing minerals (gray-green). Fe₂O₃ is red-brown.</span></div>
+<label>Oxygen reaching the rock <b id="v_o">60 %</b></label><input type="range" id="o" min="0" max="100" value="60">
+<label>Moisture on the rock <b id="v_mo">60 %</b></label><input type="range" id="mo" min="0" max="100" value="60">
+<label>Exposure time <b id="v_t3">50 years</b></label><input type="range" id="t3" min="5" max="100" step="5" value="50">
+<div class="bar"><i id="rbar"></i></div><div class="note" id="st3"></div>
+<div class="continue-bar">
+  <button class="p" id="run3">Start exposure</button>
+  <button class="g" id="rst3">New rock</button>
+</div>
+<div class="msg" id="m3a"></div>
+<p class="note">Goal: change at least 70% of the iron minerals. What happens if one ingredient is missing?</p>
+<div id="quiz3" class="quiz-box hide"></div>
+<div class="continue-bar" id="cont3" style="display:none">
+  <button class="p" id="continue3">✅ Continue to next experiment</button>
+</div>
+</section>
+
+<section id="s4" class="card hide"><h2>Stage 4 · Field Cases</h2><div id="sc"></div></section>
+
+<section id="s5" class="card hide"><h2>Stage 5 · 4 Pics, 1 Word</h2>
+<p class="note">What one word connects all four pictures? (Topic: rocks)</p>
+<div class="pics" id="pics"></div><div class="slots" id="slots"></div><div class="bank" id="bank"></div>
+<button class="g" id="clr">Clear</button><div class="msg" id="m4"></div>
+<div id="quiz5" class="quiz-box hide"></div>
+<div class="continue-bar" id="cont5" style="display:none">
+  <button class="p" id="continue5">✅ Continue to Final Stage</button>
+</div>
+</section>
+
+<section id="s6" class="card hide">
+  <h2>Stage 6 · Lab Debrief & Summary</h2>
+  <p class="note">Congratulations on completing all experiments and mastering the science of rock weathering!</p>
+  <div class="hint">
+    🏆 <b>Mastery Badge Unlocked:</b> Rock Weathering Specialist<br>
+    <span class="note">You have successfully explored physical weathering (frost wedging), chemical weathering (limestone dissolution and mineral oxidation), analyzed real-world field cases, and connected all concepts through word puzzles and synthesis.</span>
+  </div>
+  <button class="g" onclick="go(1)">🔄 Restart Lab from Beginning</button>
+</section>
+</main>
+<script>
+const $=i=>document.getElementById(i),rnd=Math.random;
+let unlocked=1,cur=1;
+let stage1Complete=false, stage2Complete=false, stage3Complete=false, stage5Complete=false;
+const names=["1 · Lab A","2 · Lab B","3 · Lab C","4 · Field Cases","5 · Final Word","6 · Debrief"];
+
+function tabs(){$("tabs").innerHTML="";names.forEach((n,i)=>{const b=document.createElement("button");b.className="tab"+(cur==i+1?" on":"");b.disabled=i+1>unlocked;b.textContent=(i+1>unlocked?"🔒 ":"")+n;b.onclick=()=>go(i+1);$("tabs").appendChild(b)})}
+function go(n){cur=n;for(let i=1;i<=6;i++)$("s"+i).classList.toggle("hide",i!=n);tabs()}
+function unlock(n){if(unlocked<n){unlocked=n;tabs()}}
+function bind(id,vid,f){$(id).addEventListener("input",()=>$(vid).textContent=f($(id).value))}
+bind("min","v_min",v=>v+" °C");bind("max","v_max",v=>v+" °C");bind("w","v_w",v=>v+" %");bind("n","v_n",v=>v);
+bind("ph","v_ph",v=>(+v).toFixed(1));bind("t","v_t",v=>v+" years");bind("o","v_o",v=>v+" %");bind("mo","v_mo",v=>v+" %");bind("t3","v_t3",v=>v+" years");
+$("min").addEventListener("input",()=>{if(+$("min").value>+$("max").value){$("max").value=$("min").value;$("v_max").textContent=$("max").value+" °C"}});
+$("max").addEventListener("input",()=>{if(+$("max").value<+$("min").value){$("min").value=$("max").value;$("v_min").textContent=$("min").value+" °C"}});
+
+/* ===== QUIZ SYSTEM ===== */
+const quizData = {
+  1: {
+    q: "What causes the rock to split during frost wedging?",
+    options: [
+      "Water freezes and expands, pushing the crack wider",
+      "The rock melts and refreezes into a new shape",
+      "Wind blows pieces of the rock away",
+      "Chemicals in the water dissolve the rock"
+    ],
+    correct: 0,
+    explanation: "Water expands about 9% when it freezes. This expansion pushes against the crack walls, widening them with each freeze-thaw cycle until the rock splits."
+  },
+  2: {
+    q: "In the limestone dissolution experiment, what happens to the CaCO₃ when acidic water reacts with it?",
+    options: [
+      "It turns into iron oxide (rust)",
+      "It dissolves into Ca²⁺ and HCO₃⁻ ions that wash away",
+      "It expands and cracks the rock apart",
+      "It changes color from gray to red-brown"
+    ],
+    correct: 1,
+    explanation: "The acid reacts with calcium carbonate (CaCO₃), converting it into dissolved calcium ions (Ca²⁺) and bicarbonate ions (HCO₃⁻). These ions are carried away by water, wearing down the rock."
+  },
+  3: {
+    q: "What happens to iron-bearing minerals during oxidation?",
+    options: [
+      "They dissolve completely in water",
+      "They expand and crack the rock",
+      "They react with oxygen and moisture to form red-brown Fe₂O₃",
+      "They turn into limestone"
+    ],
+    correct: 2,
+    explanation: "Iron minerals like FeO react with oxygen (O₂) and moisture to form iron oxide (Fe₂O₃), which is red-brown. This is a chemical change that creates a new mineral."
+  },
+  5: {
+    q: "Which of the following best summarizes the difference between physical and chemical weathering?",
+    options: [
+      "Physical weathering changes mineral composition, while chemical weathering only changes rock size.",
+      "Physical weathering breaks rocks into smaller pieces without changing their chemical composition, while chemical weathering alters the minerals into new substances.",
+      "Chemical weathering only happens in cold climates with ice, while physical weathering happens in acid rain.",
+      "Both types of weathering always happen at the exact same speed and by the exact same mechanism."
+    ],
+    correct: 1,
+    explanation: "Physical weathering breaks rocks apart mechanically (like frost wedging), keeping the same minerals. Chemical weathering alters the chemical makeup (like dissolution or oxidation) to form new substances."
+  }
+};
+
+function showQuiz(stageNum) {
+  const quizDiv = $(`quiz${stageNum}`);
+  const data = quizData[stageNum];
+  quizDiv.classList.remove("hide");
+  quizDiv.innerHTML = `
+    <h3>✅ Check Your Understanding</h3>
+    <p><b>${data.q}</b></p>
+    <div id="quizOpts${stageNum}"></div>
+    <div class="msg" id="quizMsg${stageNum}"></div>
+  `;
+  
+  const optsDiv = $(`quizOpts${stageNum}`);
+  data.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt;
+    btn.onclick = () => {
+      optsDiv.querySelectorAll(".opt").forEach(o => o.disabled = true);
+      
+      if (i === data.correct) {
+        btn.classList.add("correct");
+        $(`quizMsg${stageNum}`).className = "msg ok";
+        $(`quizMsg${stageNum}`).innerHTML = "✔ Correct! " + data.explanation;
+        
+        if (stageNum === 1) {
+          stage1Complete = true;
+          unlock(2); // Unlocks Stage 2 tab
+          $("cont1").style.display = "flex";
+        } else if (stageNum === 2) {
+          stage2Complete = true;
+          unlock(3); // Unlocks Stage 3 tab
+          $("cont2").style.display = "flex";
+        } else if (stageNum === 3) {
+          stage3Complete = true;
+          unlock(4); // Unlocks Stage 4 tab
+          $(`quizMsg${stageNum}`).innerHTML += '<br><br><button class="p" id="toStage4">Continue to Field Cases →</button>';
+          $("toStage4").onclick = () => go(4);
+        } else if (stageNum === 5) {
+          stage5Complete = true;
+          unlock(6); // Unlocks Stage 6 tab
+          $(`quizMsg${stageNum}`).innerHTML += '<br><br><button class="p" id="toStage6">Continue to Final Debrief →</button>';
+          $("toStage6").onclick = () => go(6);
+        }
+      } else {
+        btn.classList.add("wrong");
+        $(`quizMsg${stageNum}`).className = "msg bad";
+        $(`quizMsg${stageNum}`).textContent = "Not quite. Try again — click the button below to retry.";
+        
+        const retryBtn = document.createElement("button");
+        retryBtn.className = "p";
+        retryBtn.textContent = "Retry question";
+        retryBtn.onclick = () => {
+          showQuiz(stageNum);
+        };
+        $(`quizMsg${stageNum}`).appendChild(retryBtn);
+      }
+    };
+    optsDiv.appendChild(btn);
+  });
+}
+
+// Continue button handlers
+$("continue1").onclick = () => go(2);
+$("continue2").onclick = () => go(3);
+$("continue5").onclick = () => {
+  $("cont5").style.display = "none";
+  showQuiz(5);
+};
+
+/* shared rock outline */
+const px=[[100,120],[135,78],[190,62],[250,64],[300,85],[325,140],[310,210],[250,232],[170,235],[115,205]];
+const grains=[...Array(70)].map(()=>[100+rnd()*230,62+rnd()*175,1+rnd()*3]);
+function path(x){x.beginPath();px.forEach((p,i)=>i?x.lineTo(...p):x.moveTo(...p));x.closePath()}
+function rock(x,fill){path(x);x.fillStyle=fill;x.fill();x.save();x.clip();x.fillStyle="rgba(40,35,30,.22)";grains.forEach(([a,b,r])=>{x.beginPath();x.arc(a,b,r,0,7);x.fill()});x.restore();path(x);x.strokeStyle="#4a4743";x.lineWidth=2;x.stroke()}
+
+/* ---------- Stage 1: frost wedging ---------- */
+const c1=$("c1").getContext("2d");let D=0,cyc=0,broken=false,phase="",busy=false,timer,bp=0;
+const reg=[[90,50,150],[150,50,210],[210,50,265],[265,50,335]],off=[[-42,8,-.07],[-14,28,.05],[18,20,-.05],[46,10,.08]];
+function draw1(){const x=c1;x.clearRect(0,0,420,270);const w=+$("w").value/100,cross=+$("min").value<0&&+$("max").value>0;
+ x.fillStyle="#666";x.font="14px system-ui";x.fillText(phase=="freeze"?"🌙 Night: "+$("min").value+" °C":phase=="thaw"?"☀️ Day: "+$("max").value+" °C":"",10,24);
+ if(broken){reg.forEach((r,i)=>{x.save();const o=off[i];x.translate(o[0]*bp,o[1]*bp);x.translate(210,150);x.rotate(o[2]*bp);x.translate(-210,-150);x.beginPath();x.rect(r[0],r[1],r[2]-r[0],200);x.clip();rock(x,"#8c8680");x.restore()});
+  x.fillStyle="#999";for(let i=0;i<14;i++){x.beginPath();x.arc(95+rnd()*0+i*17,250+(i%3)*3,2+(i%3),0,7);x.fill()}return}
+ rock(x,"#8c8680");const d=45+D*1.2,g=1.5+D*.2+(phase=="freeze"&&cross&&w>0?3*w:0);
+ if(D>55){x.strokeStyle="#2a2826";x.lineWidth=1+D/40;x.globalAlpha=Math.min(1,(D-55)/30);x.beginPath();x.moveTo(210,60+d*.6);x.lineTo(160,200);x.moveTo(210,60+d*.7);x.lineTo(268,215);x.stroke();x.globalAlpha=1}
+ x.beginPath();x.moveTo(210-g/2,60);x.lineTo(210+g/2,60);x.lineTo(210,60+d);x.closePath();x.fillStyle="#1d1b19";x.fill();
+ if(w>0){x.save();x.clip();const lv=60+d*(1-w);x.fillStyle=phase=="freeze"&&cross?"#eaf8ff":"#3f97d6";x.fillRect(150,lv,120,200);x.restore()}
+ if(phase=="freeze"&&cross&&w>0){x.fillStyle="#d33";x.font="bold 18px system-ui";x.fillText("◀",210-g/2-22,60+d*.35);x.fillText("▶",210+g/2+6,60+d*.35)}}
+function upd1(){$("dmg").style.width=Math.min(D,100)+"\%";$("st1").textContent=`Crack width: ${(1.5+D*.2).toFixed(1)} mm · Cycles: ${cyc} · Rock damage: ${Math.min(100,Math.round(D))}%`;draw1()}
+function dmg(){const mn=+$("min").value,mx=+$("max").value,w=+$("w").value/100,cross=mn<0&&mx>0;
+ return (cross?w*7*(1+Math.min(-mn,15)/30)*(1+D/70):0)+((mx-mn)/50)*.2}
+$("run1").onclick=()=>{if(busy\vert{}\vert{}broken)return;busy=true;$("run1").disabled=true;let left=+$("n").value,half=0;
+ timer=setInterval(()=>{if(!half){phase="freeze";half=1}else{phase="thaw";half=0;D+=dmg();cyc++;left--;
+  if(D>=100){D=100;clearInterval(timer);busy=false;phase="";broken=true;bp=0;const a=setInterval(()=>{bp=Math.min(1,bp+.08);draw1();if(bp>=1)clearInterval(a)},40);
+   $("m1").className="msg ok";$("m1").textContent="The rock split into smaller pieces! Now answer a question to continue.";
+   setTimeout(() => showQuiz(1), 800);
+  }
+  else if(left<=0){clearInterval(timer);busy=false;phase="";$("run1").disabled=false;$("m1").className="msg";$("m1").textContent=D<5?"Almost no change. Which ingredient might be missing?":"The crack grew but the rock is still whole. Adjust settings or run more cycles."}}upd1()},300)};
+$("rst1").onclick=()=>{clearInterval(timer);D=0;cyc=0;broken=false;busy=false;phase="";$("run1").disabled=false;$("m1").textContent="";$("quiz1").classList.add("hide");$("quiz1").innerHTML="";$("cont1").style.display="none";upd1()};
+
+/* ---------- Stage 2: dissolving limestone ---------- */
+const c2=$("c2").getContext("2d");let M=100,y2=0,run2=false,t2,fr=0;const N=44,bump=[...Array(N)].map(()=>.5+rnd()),pits=[...Array(26)].map(()=>[rnd()*N|0,rnd()]);
+const rate=ph=>.1*Math.pow(10,(7-ph)*.4);
+function draw2(){const x=c2,ph=+$("ph").value;fr++;x.clearRect(0,0,420,270);const E=(100-M)/100*125,cw=240/N;
+ const rc=ph<3?"#e35d6a":ph<5?"#e8a15a":"#4aa3df";x.fillStyle=rc;
+ if(run2)for(let i=0;i<14;i++){const dx=60+(i*29)%300,dy=(fr*5+i*47)%160;x.beginPath();x.ellipse(dx,dy,1.8,4,0,0,7);x.fill()}
+ x.fillStyle="#666";x.font="13px system-ui";x.fillText("rain pH "+ph.toFixed(1),10,18);
+ for(let i=0;i<N;i++){const top=95+E*bump[i]*(.8+.3*Math.sin(i*1.7)),h=240-top;x.fillStyle=i%2?"#d9d3c3":"#d3ccba";x.fillRect(90+i*cw,top,cw+.6,h)}
+ x.fillStyle="rgba(90,80,60,.4)";if(E>10)pits.forEach(([c,r])=>{const top=95+E*bump[c];x.beginPath();x.arc(90+c*cw+cw/2,top+4+r*10*(E/60),2+E/40,0,7);x.fill()});
+ x.fillStyle="#7a7466";x.fillRect(80,240,260,12);
+ if(run2&&M>0){x.font="11px system-ui";x.fillStyle="#2a6a9a";for(let i=0;i<5;i++){x.fillText(i%2?"HCO₃⁻":"Ca²⁺",335+(fr*1.3+i*25)%70,120+((fr*1.1+i*40)%120))}}
+ if(M<=0){x.fillStyle="#444";x.font="13px system-ui";x.fillText("Nearly all limestone has dissolved away",100,200)}}
+function upd2(){$("mass").style.width=Math.max(M,0)+"\%";$("st2").textContent=`Rock remaining: ${Math.max(0,Math.round(M))}% · Surface lowered: ${(((100-M)/100*125)/2).toFixed(0)} mm · Time: ${Math.round(y2)} years`}
+$("run2").onclick=()=>{if(run2\vert{}\vert{}M<=0)return;run2=true;$("run2").disabled=true;const T=+$("t").value,ph=+$("ph").value,dt=T/150;let e=0;
+ t2=setInterval(()=>{e+=dt;y2+=dt;M=Math.max(0,M-rate(ph)*dt);upd2();
+  if(e>=T||M<=0){clearInterval(t2);run2=false;$("run2").disabled=false;
+   if(M<50){$("m2").className="msg ok";$("m2").textContent="Over half of the limestone is gone! Now answer a question to continue.";
+     setTimeout(() => showQuiz(2), 800);
+   }
+   else{$("m2").className="msg";$("m2").textContent="The surface is rough and pitted, but most of the rock remains. Try lower pH or more time."}}},50)};
+$("rst2").onclick=()=>{clearInterval(t2);M=100;y2=0;run2=false;$("run2").disabled=false;$("m2").textContent="";$("quiz2").classList.add("hide");$("quiz2").innerHTML="";$("cont2").style.display="none";upd2()};
+
+/* ---------- Stage 3: iron minerals turning red-brown ---------- */
+const c3=$("c3").getContext("2d");let R=0,y3=0,run3=false,t3,f3=0;
+const spots=[...Array(46)].map(()=>[110+rnd()*210,70+rnd()*160,rnd()*75,6+rnd()*11]);
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t)),O=[232,138,48],Rd=[188,58,38],Br=[118,68,42],Gy=[104,112,108];
+function col(r){return r<50?mix(O,Rd,r/50):mix(Rd,Br,(r-50)/50)}
+function draw3(){const x=c3;f3++;x.clearRect(0,0,420,270);const o=+$("o").value/100,m=+$("mo").value/100;
+ const c=col(R),base=mix(Gy,c,Math.min(1,R/100)*.75);rock(x,`rgb(${base})`);
+ x.save();path(x);x.clip();spots.forEach(([a,b,th,s])=>{if(R>th){const k=Math.min(1.5,.4+(R-th)/60),cc=col(Math.min(100,R+th/4));x.fillStyle=`rgba(${cc},.8)`;x.beginPath();x.arc(a,b,s*k,0,7);x.fill()}});x.restore();
+ if(R>60){path(x);x.strokeStyle=`rgb(${Br})`;x.lineWidth=2+R/18;x.stroke()}
+ x.font="12px system-ui";x.fillStyle="#4b7fb0";for(let i=0;i<Math.round(o*9);i++)x.fillText("O₂",20+((i*83+f3*.8)%380),30+((i*41)%200)+Math.sin((f3+i*9)/12)*8);
+ x.fillStyle="#3f97d6";for(let i=0;i<Math.round(m*10);i++){x.beginPath();x.ellipse(60+(i*37)%320,(f3*3+i*53)%250,2,4,0,0,7);x.fill()}}
+setInterval(()=>{if(!$("s2").classList.contains("hide"))draw2();if(!$("s3").classList.contains("hide"))draw3()},60);
+function upd3(){$("rbar").style.width=R+"\%";$("st3").textContent=`Iron minerals changed to red-brown Fe₂O₃: ${Math.round(R)}% · Time: ${Math.round(y3)} years`}
+$("run3").onclick=()=>{if(run3\vert{}\vert{}R>=100)return;run3=true;$("run3").disabled=true;const T=+$("t3").value,o=+$("o").value/100,m=+$("mo").value/100,dt=T/150,r=2*o*m+.02*o;let e=0;
+ t3=setInterval(()=>{e+=dt;y3+=dt;R=Math.min(100,R+r*dt);upd3();
+  if(e>=T||R>=100){clearInterval(t3);run3=false;$("run3").disabled=false;
+   if(R>=70){$("m3a").className="msg ok";$("m3a").textContent="The rock is covered in red-brown rust! Now answer a question to continue.";
+     setTimeout(() => showQuiz(3), 800);
+   }
+   else{$("m3a").className="msg";$("m3a").textContent=R<10?"Hardly any color change. Check oxygen and moisture, and try more time.":"Some color change. Increase the ingredients or the time."}}},50)};
+$("rst3").onclick=()=>{clearInterval(t3);R=0;y3=0;run3=false;$("run3").disabled=false;$("m3a").textContent="";$("quiz3").classList.add("hide");$("quiz3").innerHTML="";$("cont3").style.display="none";upd3()};
+
+/* ---------- Stage 4: field cases ---------- */
+const S=[
+ {t:"Case 1 · The garden wall",d:"A tree seed sprouts in a small crack of a sandstone wall. Over 30 years the roots thicken and the crack widens until a block splits in two. Tests show the broken edges contain the same minerals as the rest of the wall.",a:"Physical",e:"Growing roots push the crack open and break the rock apart. The minerals are unchanged, so only the size and shape changed: physical."},
+ {t:"Case 2 · The old gravestone",d:"A limestone gravestone from 1920 once had sharp letters. Today the letters are blurred and the surface is rough and pitted. The city has heavy traffic, and the rain is more acidic than normal. A drop of vinegar on a fresh chip of the same stone fizzes.",a:"Chemical",e:"Acid reacts with calcium carbonate and dissolves it into ions; the fizz is CO₂ gas. The original mineral is changed into dissolved substances: chemical."},
+ {t:"Case 3 · The canyon wall",d:"A canyon wall contains lots of iron-bearing minerals. Fresh breaks are dark gray, but the outside, exposed for centuries to humid air and rain, has a crumbly orange-brown crust. Tests show the crust is a different mineral (iron oxide) from the original rock.",a:"Chemical",e:"Oxygen and water convert iron minerals into iron oxide, a new substance, so the rock's composition changed: chemical."}];
+let si=0;
+function showS(){const s=S[si];$("sc").innerHTML=`<h2>${s.t}</h2><p>${s.d}</p><p><b>Is the change in this rock mainly physical or chemical?</b></p>
+<button class="opt" data-a="Physical">Physical</button><button class="opt" data-a="Chemical">Chemical</button><div class="msg" id="m3"></div>`;
+ $("sc").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(b.dataset.a==s.a){$("m3").className="msg ok";$("m3").innerHTML="✔ Correct. "+s.e+`<br><button class="p" id="nx">Next</button>`;$("sc").querySelectorAll(".opt").forEach(o=>o.disabled=true);$("nx").onclick=()=>{si++;si<S.length?showS():openQ()}}
+ else{$("m3").className="msg bad";$("m3").textContent="Not quite. Ask yourself: is the rock's material the same or has it become something new?"}})}
+function openQ(){$("sc").innerHTML=`<h2>Open-ended question</h2><p>Using what you saw in all three experiments, explain what happened to the rocks. Describe how <b>at least one setting you changed</b> affected the result, and say whether the rock's minerals stayed the same or became something new.</p>
+<textarea id="ans" placeholder="Write your explanation here (at least 25 characters)..."></textarea><button class="p" id="sub">Submit answer</button><div class="msg" id="m3"></div>`;
+ $("sub").onclick=()=>{if($("ans").value.trim().length<25){$("m3").className="msg bad";$("m3").textContent="Please write a fuller explanation.";return}
+ $("sub").disabled=true;$("ans").disabled=true;$("m3").className="";$("m3").innerHTML=`<div class="note"><b>Check your answer for these ideas:</b><br>• Lab A: water in the crack turns to ice below 0 °C and expands about 9%, wedging the crack wider with each freeze–thaw cycle until the rock splits. More water and more cycles speed this up. Same minerals (physical).<br>• Lab B: acidic water reacts with CaCO₃ and carries it away as Ca²⁺ and HCO₃⁻ ions, so the surface wears down. Lower pH and more time speed this up (chemical).<br>• Lab C: oxygen and moisture convert iron minerals (FeO) into red-brown Fe₂O₃, a new mineral. Without oxygen or moisture, little happens (chemical).</div><button class="p" id="fin">Go to the final stage</button>`;$("fin").onclick=()=>{unlock(5);go(5)}}}
+showS();
+
+/* ---------- Stage 5: 4 pics 1 word ---------- */
+const P=['<rect width="100" height="100" fill="#cfd8dc"/><path d="M15 80 L25 35 L55 20 L85 40 L80 80Z" fill="#8a8580"/><path d="M52 21 L48 42 L58 55 L50 80" stroke="#222" stroke-width="3" fill="none"/>',
+'<rect width="100" height="100" fill="#cfd8dc"/><path d="M10 90 L30 20 L47 15 L55 90Z M58 90 L60 15 L80 22 L92 90Z" fill="#7d7873"/><path d="M47 15 L55 90 L58 90 L60 15Z" fill="#cfeeff"/>',
+'<rect width="100" height="100" fill="#d6e6df"/><path d="M5 85 Q50 60 95 85 L95 100 L5 100Z" fill="#d9d3c3"/><path d="M50 8 Q60 28 50 36 Q40 28 50 8Z" fill="#4aa3df"/><circle cx="30" cy="80" r="3" fill="#bbb"/><circle cx="58" cy="76" r="2" fill="#bbb"/><circle cx="72" cy="82" r="3" fill="#bbb"/>',
+'<rect width="100" height="100" fill="#e9dfc7"/><path d="M20 70 L30 40 L60 35 L80 60 L70 85 L30 88Z" fill="#a8452f"/><circle cx="40" cy="60" r="8" fill="#c8693a"/><circle cx="62" cy="68" r="6" fill="#7a4a2b"/>'];
+$("pics").innerHTML=P.map(p=>`<svg viewBox="0 0 100 100">${p}</svg>`).join("");
+const ANS="WEATHERING",L="HSEIATNRLEGW".split("");let sl=Array(10).fill(null);
+function r5(){$("slots").innerHTML="";sl.forEach((v,i)=>{const b=document.createElement("button");b.className="t";b.textContent=v!=null?L[v]:"";b.onclick=()=>{sl[i]=null;r5()};$("slots").appendChild(b)});
+ $("bank").innerHTML="";L.forEach((l,i)=>{const b=document.createElement("button");b.className="t";b.textContent=l;b.disabled=sl.includes(i);b.onclick=()=>{const k=sl.indexOf(null);if(k<0)return;sl[k]=i;r5();if(!sl.includes(null))chk()};$("bank").appendChild(b)})}
+function chk(){if(sl.map(i=>L[i]).join("")==ANS){
+  $("m4").className="msg ok";
+  $("m4").textContent="🎉 WEATHERING! You've completed the word puzzle.";
+  $("cont5").style.display="flex";
+}else{
+  $("m4").className="msg bad";
+  $("m4").textContent="Not the right word yet. Tap a letter in the answer row to remove it.";
+}}
+$("clr").onclick=()=>{sl.fill(null);$("m4").textContent="";$("cont5").style.display="none";$("quiz5").classList.add("hide");$("quiz5").innerHTML="";r5()};
+r5();upd1();upd2();upd3();tabs();
+</script></body></html>
