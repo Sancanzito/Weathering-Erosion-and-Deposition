@@ -64,7 +64,9 @@ export default function RockLab({ onProgress }) {
 
   return (
     <div>
-      <PageSpy key={cur} sections={cur === 4 ? FINAL_SECTIONS : SIM_SECTIONS} contained />
+      {/* Mounted exactly once for the whole lab — the chips swap with the
+          stage, but the bar itself never re-renders or duplicates */}
+      <PageSpy sections={cur === 4 ? FINAL_SECTIONS : SIM_SECTIONS} contained />
       <div id="lab-top" className="relative rounded-3xl bg-gradient-to-br from-[#2B1D16] via-[#5D4037] to-[#8D6E63] p-7 text-[#FFF8F0] sm:p-9">
         <SoundToggle />
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#D7CCC8]">

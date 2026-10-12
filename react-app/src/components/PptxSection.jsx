@@ -232,6 +232,30 @@ export default function PptxSection() {
     setOffice(true)
   }
 
+  // Offline: hand the deck straight to the desktop PowerPoint app.
+  // Office URI scheme — https://learn.microsoft.com/office/client-uri-protocol-reference
+  const openInPowerPoint = () => {
+    sfx.click()
+    const href = fileUrl || deckHref
+    if (!href) {
+      setErr('Load a presentation first.')
+      sfx.wrong()
+      return
+    }
+    if (href.startsWith('blob:')) {
+      const a = document.createElement('a')
+      a.href = href
+      a.download = name || 'presentation.pptx'
+      a.click()
+      setErr('PowerPoint cannot reach a browser-only file, so the deck was downloaded — double-click the downloaded file to open it in PowerPoint.')
+      sfx.pop()
+      return
+    }
+    setErr('')
+    const abs = new URL(href, window.location.href).href
+    window.location.href = `ms-powerpoint:ofe|u|${encodeURIComponent(abs)}`
+  }
+
   const officeSrc =
     `https://view.officeapps.live.com/op/embed.aspx?src=` +
     encodeURIComponent(new URL(deckHref, window.location.href).href)
@@ -367,6 +391,12 @@ export default function PptxSection() {
                   >
                     ⬇️ Download & present in PowerPoint
                   </a>
+                  <button
+                    onClick={openInPowerPoint}
+                    className="btn-anim rounded-full bg-[#C43E1C] px-5 py-2 text-xs font-extrabold text-white hover:brightness-110"
+                  >
+                    🖥️ Open in PowerPoint
+                  </button>
                   {CANVA_URL && (
                     <a
                       href={CANVA_URL}
@@ -380,12 +410,44 @@ export default function PptxSection() {
                   )}
                 </div>
 
+                {/* The actual links, spelled out so students can copy them */}
+                <div className="mt-3 space-y-1 text-center text-xs text-[#8D6E63]">
+                  {CANVA_URL && (
+                    <p>
+                      🔗 Canva link:{' '}
+                      <a
+                        href={CANVA_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => sfx.click()}
+                        className="font-bold text-[#6D4C41] underline underline-offset-2 hover:text-[#3E2723]"
+                      >
+                        {CANVA_URL}
+                      </a>
+                    </p>
+                  )}
+                  {deckHref && !deckHref.startsWith('blob:') && (
+                    <p>
+                      📄 Deck link:{' '}
+                      <a
+                        href={deckHref}
+                        download={name || 'presentation.pptx'}
+                        onClick={() => sfx.click()}
+                        className="font-bold text-[#6D4C41] underline underline-offset-2 hover:text-[#3E2723]"
+                      >
+                        {new URL(deckHref, window.location.href).href}
+                      </a>
+                    </p>
+                  )}
+                </div>
+
                 <p className="mt-2 text-center text-xs text-[#8D6E63]">
                   {office
                     ? 'Rendered by Microsoft Office Online — 100% of the original layout (needs internet).'
                     : 'Offline viewer: use ◀ ▶ buttons, the filmstrip, or your arrow keys. Some charts, animations and transitions may differ from PowerPoint.'}{' '}
-                  The deck ships with the app, so the offline viewer and PowerPoint download
-                  work with no internet; Office Online and Canva need a connection.
+                  🖥️ <b>Open in PowerPoint</b> launches the PowerPoint app straight from this page —
+                  works offline. The deck ships with the app, so the offline viewer and PowerPoint
+                  download work with no internet; Office Online and Canva need a connection.
                 </p>
               </>
             )}

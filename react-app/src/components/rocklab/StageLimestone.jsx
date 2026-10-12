@@ -120,7 +120,7 @@ export default function StageLimestone({ onUnlock, onPassed: onStagePassed, onAd
 
   return (
     <div>
-      <p id="stage-scenario" className="mb-3 rounded-xl bg-[#EFEBE9] px-3 py-2 text-xs font-semibold text-[#5D4037]">
+      <p id="stage-scenario" className="mb-4 rounded-2xl bg-gradient-to-r from-[#EFEBE9] to-[#E6DACA] px-5 py-4 text-[24px] font-semibold leading-snug text-[#4E342E] shadow-sm">
        Scenario: A limestone rock is exposed to acidic rainfall over many years, causing its surface to slowly dissolve and pit away.
       </p>
       <p className="mb-3 rounded-xl bg-[#EFEBE9] px-3 py-2 text-xs font-semibold text-[#5D4037]">
