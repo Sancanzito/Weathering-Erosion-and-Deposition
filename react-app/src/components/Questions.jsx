@@ -54,12 +54,12 @@ export default function Questions({ onBack }) {
         ← Back to Main
       </button>
 
-      <div className="rounded-3xl bg-gradient-to-br from-[#5D4037] to-[#A1887F] p-7 text-white sm:p-9">
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#EFEBE9]/80">
+      <div className="rounded-3xl bg-gradient-to-br from-[#5D4037] to-[#A1887F] p-7 text-white shadow-lg sm:p-10">
+        <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-[#FFD54F] sm:text-base">
           Check yourself
         </p>
-        <h2 className="mt-1 text-3xl font-black">Questions</h2>
-        <p className="mt-4 rounded-2xl bg-black/20 p-4 text-sm leading-relaxed">
+        <h2 className="mt-2 text-4xl font-black sm:text-6xl">Questions</h2>
+        <p className="mt-6 rounded-3xl bg-black/25 p-5 text-xl font-semibold leading-relaxed text-[#FFF8F0] sm:p-8 sm:text-2xl">
           Considering that weathering destroys steel and concrete buildings,
           erosion erodes soil and often covers infrastructure while deposition
           disperses water in an area. Are these geological processes still

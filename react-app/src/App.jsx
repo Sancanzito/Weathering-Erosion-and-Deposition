@@ -190,7 +190,7 @@ export default function App() {
                 </div>
               </section>
 
-              {/* PPT PLACEHOLDER — teacher's presentation plays here */}
+              {/* PPT — one click opens the presentation in Canva */}
               <PptxSection />
 
               {/* PART PICKER */}
