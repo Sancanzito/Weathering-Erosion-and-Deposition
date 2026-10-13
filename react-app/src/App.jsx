@@ -37,8 +37,8 @@ const PHYS_SECTIONS = [
 ]
 const EROSION_SECTIONS = [
   { id: 'erosion-intro', label: 'Overview' },
-  { id: 'erosion-process', label: 'Process' },
-  { id: 'erosion-impact', label: 'Impact' },
+  { id: 'erosion', label: 'Erosion' },
+  { id: 'deposition', label: 'Deposition' },
   { id: 'erosion-video', label: 'Video' },
   { id: 'knowledge-check', label: 'Check' },
 ]
